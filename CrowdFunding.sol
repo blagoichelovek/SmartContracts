@@ -2,6 +2,9 @@
 pragma solidity 0.8.5;
  
 contract CrowdFunding {
+
+    error TransferFailed();
+
     mapping(address => uint) public contributors;
     address public admin;
     uint public noOfContributors;
@@ -79,7 +82,10 @@ contract CrowdFunding {
         
         // resetting the value sent by the contributor and transfering the value
         contributors[msg.sender] = 0;  
-        recipient.transfer(value);
+        (bool success, ) = recipient.call{value: value}("");
+        if(!success){
+            revert TransferFailed();
+        }
         // equivalent to:
         // payable(msg.sender).transfer(contributors[msg.sender]);
     }
